@@ -6,7 +6,7 @@ export type ApiListResponse<T> = {
 export interface IProduct {
     id: string;
     title: string;
-    price: number;
+    price: number | null;
     category: string;
     image: string;
     description?: string;
@@ -32,9 +32,12 @@ export interface IUser {
 }
 
 export interface IOrder {
-    user: IUser;
-    form: IForm;
+    email: string;
+    phone: string;
+    address: string;
+    payment: 'card' | 'cash';
     items: string[];
+    total: number;
 }
 
 export interface IBasketItem {
@@ -51,6 +54,7 @@ export interface IBasket {
 export interface IBasketModel extends IBasket {
     addToBasket(id: string): void;
     removeFromBasket(id: string): void;
+    clear(): void;
   }
 
 export interface IEventEmitter {
