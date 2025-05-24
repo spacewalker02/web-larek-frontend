@@ -47,7 +47,7 @@ export interface IBasketItem {
 }
 
 export interface IBasket {
-	items: Map<string, IBasketItem>;
+	items: Set<string>;
 	remove(id: string): void;
 }
 
