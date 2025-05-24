@@ -103,11 +103,11 @@ yarn build
 
 **Назначение:** хранение данных о корзине пользователя и реализация методов для добавления и удаления товаров.
 
-**Конструктор:** `constructor(initialItems?: Map<string, number>)`
+**Конструктор:** `constructor(initialItems?: Set<string>)`
 
 **Поля:**
 
-- `items: Map<string, number>` - ключ: id товара, значение: количество
+- `items: Set<string>` - содержит id товаров в корзине
 
 **Методы:**
 
@@ -149,13 +149,46 @@ yarn build
 
 ## Представления
 
+### MainView
+
+**Назначение:** отображает список товаров на главной странице, управляет контейнером, в котором выводятся карточки товаров, а также отображает кнопку открытия корзины и счётчик количества заказов.
+
+**Конструктор:** `constructor(container: HTMLElement)`
+
+**Поля:**
+
+- `container: HTMLElement` - корневой элемент для списка товаров
+- `basketCountElement: HTMLElement` - DOM-элемент счетчика корзины
+- `basketButton: HTMLElement` — DOM-элемент кнопки открытия корзины
+
+**Методы:**
+
+- `render(products: IProduct[]): void` — отрисовать все товары на странице
+- `updateBasketCount(count: number): void` — обновить счётчик корзины
+- `bindEvents(): void` — навесить обработчики событий на кнопку “корзина”
+
+### ModalView
+
+**Назначение:** управляет отображением модального окна: открытие/закрытие, вставка нужного содержимого (success, preview карточки, оформление заказа и т.д.).
+
+**Конструктор:** `constructor(container: HTMLElement)`
+
+**Поля:**
+
+- `container: HTMLElement` — DOM-элемент с id="modal-container"
+- `content: HTMLElement` — содержимое модального окна
+
+**Методы:**
+
+- `open(content: HTMLElement): void` — отобразить модальное окно с указанным содержимым
+- `close(): void` — закрыть модальное окно (очистить контейнер)
+- `bindEvents(): void` — обработка событий закрытия по клику вне окна или на крестик
+
 ### SuccessView
 
 **Назначение:** показывает модальное окно об успешном оформлении заказа.
 
-**Конструктор:**
-
-`constructor(container: HTMLElement)`
+**Конструктор:** `constructor(container: HTMLElement)`
 
 **Поля:**
 
@@ -164,114 +197,111 @@ yarn build
 
 **Методы:**
 
-- `render(): void` - отображает окно "Заказ успешно отправлен".
+- `render(total: number): void` - отображает окно "Заказ успешно отправлен".
 - `close(): void` - скрывает/удаляет окно.
 
 ### CardCatalogView
 
 **Назначение:** отображает карточку товара, показывает информацию о товаре и позволяет добавить его в корзину.
 
-**Конструктор:**
-
-- `constructor(product: IProduct)`
+**Конструктор:** `constructor(container: HTMLElement, emitter: EventEmitter)`
 
 **Поля:**
 
-- `product: IProduct` - данные о товаре.
+- `container: HTMLElement` - родительский DOM-элемент, в который будет вставлена карточка.
 - `element: HTMLElement` - ссылка на DOM-элемент карточки.
+- `emitter: EventEmitter` - для отправки событий.
 
 **Методы:**
 
-- `render(): HTMLElement` - формирует и возвращает карточку товара.
+- `render(product: IProduct): HTMLElement` - создает и возвращает DOM-элемент карточки на основе переданных данных.
 - `bindEvents(): void` - добавляет слушатели событий
 
 ### СardPreviewView
 
 **Назначение:** показывает модальное окно с подробной информацией о товаре и позволяет добавить его в корзину.
 
-**Конструктор:**
-
-- `constructor(container: HTMLElement, product: IProduct)`
+**Конструктор:** `constructor(container: HTMLElement, emitter: EventEmitter)`
 
 **Поля:**
 
-- `product: IProduct` - данные о товаре.
+- `container: HTMLElement` - контейнер для вставки карточки
 - `element: HTMLElement` - ссылка на DOM-элемент карточки.
+- `emitter: EventEmitter` — брокер событий
 
 **Методы:**
 
-- `render(): HTMLElement` - формирует и возвращает карточку товара.
+- `render(product: IProduct): HTMLElement` - формирует и возвращает карточку товара.
 - `bindEvents(): void` - добавляет слушатели событий
 
 ### СardBasketView
 
 **Назначение:** отображает карточку товара в корзине с возможностью удаления.
 
-**Конструктор:** `(item: IBasketItem)`
+**Конструктор:** `constructor(container: HTMLElement, emitter: EventEmitter)`
 
 **Поля:**
 
-- `item: IBasketItem` - данные о товаре
 - `element: HTMLElement` - DOM-элемент карточки товара в корзине
+- `container: HTMLElement` - контейнер для вставки карточки
+- `emitter: EventEmitter` — брокер событий
 
 **Методы:**
 
-- `render(): HTMLElement` - создает и возвращает DOM-элемент карточки товара в корзине
+- `render(items: IBasketItem): HTMLElement` - создает и возвращает DOM-элемент карточки товара в корзине
 - `bindEvents(): void` - добавляет слушатели
 
 ### BasketView
 
 **Назначение:** контейнер для списка товаров в корзине и блока с итоговой стоимостью.
 
-**Конструктор:** `(container: HTMLElement)`
+**Конструктор:** `(container: HTMLElement, emitter: EventEmitter)`
 
 **Поля:**
 
-- `items: IBasketItem[]` - список товаров в корзине
 - `element: HTMLElement` - DOM-элемент корзины (контейнер)
+- `emitter: EventEmitter` — для отправки событий
 
 **Методы:**
 
-- `render(items: IBasketItem[]): HTMLElement` - создает и возвращает DOM-элемент корзины с товарами
+- `render(cards: HTMLElement[]): void` - отображает список карточек товаров в корзине
 - `bindEvents(): void` - слушатели на кнопки оформления заказа и т.д.
 
 ### OrderView
 
 **Назначение:** позволяет выбрать способ оплаты и вписать адрес пользователя для последующего оформления заказа, а также выполняет валидацию и отправку данных.
 
-**Конструктор:** `(container: HTMLElement, user?: IUser)`
+**Конструктор:** `(container: HTMLElement, emitter: EventEmitter)`
 
 **Поля:**
 
-- `user: IUser` - данные пользователя
+- `emitter: EventEmitter` — брокер событий
 - `element: HTMLElement` - DOM-элемент формы заказа
 - `form: HTMLFormElement` - ссылка на DOM-форму
 - `fields: { [key: string]: HTMLInputElement }` - ссылки на поля ввода
 
 **Методы:**
 
-- `render(): HTMLElement` - создает и возвращает DOM-элемент формы заказа
+- `render(user?: IUser): HTMLElement` - создает и возвращает DOM-элемент формы заказа
 - `bindEvents(): void` - добавляет обработчики событий
-- `validate(): boolean` - проверяет корректность введенных данных
-- `getData(): IOrder` - собирает данные из формы и возвращает объект заказа
 - `showError(message: string): void` - показывает ошибку пользователю
 
 ### ContactsView
 
 **Назначение:** позволяет вписать контактные данные пользователя, такие как телефон и email с последующей возможностью оформить заказ, а также выполняет валидацию и отправку данных.
 
-**Конструктор:** `(container: HTMLElement, user?: IUser)`
+**Конструктор:** `(container: HTMLElement, emitter: EventEmitter)`
 
 **Поля:**
 
-- `user: IUser` - данные пользователя
+- `emitter: EventEmitter` — брокер событий
 - `element: HTMLElement` - DOM-элемент формы заказа
 - `form: HTMLFormElement` - ссылка на DOM-форму
 - `fields: { [key: string]: HTMLInputElement }` - ссылки на поля ввода
 
 **Методы:**
 
-- `render(): HTMLElement` - создает и возвращает DOM-элемент формы заказа
+- `render(user?: IUser): HTMLElement` - создает и возвращает DOM-элемент формы заказа
 - `bindEvents(): void` - добавляет обработчики событий
 - `validate(): boolean` - проверяет корректность введенных данных
 - `getData(): IOrder` - собирает данные из формы и возвращает объект заказа
