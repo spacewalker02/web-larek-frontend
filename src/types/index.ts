@@ -12,15 +12,6 @@ export interface IProduct {
     description?: string;
 }
 
-export interface ICatalog {
-    items: IProduct[];
-    getItem(id: string): IProduct | undefined;
-}
-
-export interface ICatalogModel extends ICatalog {
-    setItems(items: IProduct[]): void;
-  }
-
 export interface IForm {
     payment: 'card' | 'cash';
     address: string;
@@ -35,41 +26,17 @@ export interface IOrder {
     email: string;
     phone: string;
     address: string;
-    payment: 'card' | 'cash';
+    payment?: 'card' | 'cash';
     items: string[];
-    total: number;
+    total?: number;
 }
+
+export interface IOrderResponse {
+    id: string;
+  }
 
 export interface IBasketItem {
 	id: string;
 	title: string;
 	price: number;
 }
-
-export interface IBasket {
-	items: Set<string>;
-	remove(id: string): void;
-}
-
-export interface IBasketModel extends IBasket {
-    addToBasket(id: string): void;
-    removeFromBasket(id: string): void;
-    clear(): void;
-  }
-
-export interface IEventEmitter {
-    emit(event: string, ...args: any[]): void;
-}
-
-export interface ILarekApi {
-    getItems: () => Promise<IProduct[]>;
-    createOrder: (order: IOrder) => Promise<void>;
-}
-
-export interface IView {
-    render(data?: object): HTMLElement;
-}
-
-export interface IViewConstructor {
-    new (container: HTMLElement, events?: IEventEmitter): IView;
-  }
