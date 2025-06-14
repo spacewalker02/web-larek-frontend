@@ -1,6 +1,7 @@
 import { LarekApi } from './base/LarekApi';
 import { CatalogModel } from './base/CatalogModel';
-import { Card, formatPrice } from './Card';
+import { Card } from './Card';
+import { formatPrice } from '../utils/utils';
 import { IEvents } from './base/events';
 import { IForm, IOrder, IOrderResponse, IProduct, IUser } from '../types';
 import { Modal } from './common/Modal';
@@ -13,6 +14,7 @@ import { OrderView } from './OrderView';
 import { ContactsView } from './ContactsView';
 import { Success } from './common/Success';
 import { OrderModel } from './base/OrderModel';
+import { BasketViewItem } from './BasketViewItem';
 
 export class ProductListView {
     constructor(
@@ -49,7 +51,8 @@ export class ProductListView {
       private orderView: OrderView,
       private contactsView: ContactsView,
       private successView: Success,
-      private orderModel: OrderModel
+      private orderModel: OrderModel,
+      private basketItemTeplate: HTMLTemplateElement
     ) {}
   
     init() {
@@ -78,26 +81,26 @@ export class ProductListView {
         });
 
         this.events.on('basket:open', () => {
-            const items = this.basket.getItems().map((id) => this.catalog.getItemById(id));
-            this.basketView.items = items;
+            this.basketView.items = this.renderBasketItems();
             this.modal.content = this.basketView.getElement();
             this.modal.open();
         });
 
         this.events.on('basket:remove', (data: { id: string }) => {
             this.basket.removeItem(data.id);
-          
-            const items = this.basket.getItems().map((id) => this.catalog.getItemById(id));
-            this.basketView.items = items;
-          
-            this.updateCounter();
-          
+            this.basketView.items = this.renderBasketItems();
+            this.updateCounter();         
             this.basketView.disabled = this.basket.getItems().length === 0;
         });
 
         this.events.on('order: submit', () => {
           this.modal.content = this.orderView.render();
           this.modal.open();
+        });
+
+        this.events.on('form:errors', (data: { errors: string; isValid: boolean }) => {
+          this.orderView.showError(data.errors);
+          this.orderView.setSubmitBtnDisabled(!data.isValid);
         });
 
         this.events.on('order:next', (data: IForm) => {
@@ -138,9 +141,57 @@ export class ProductListView {
           this.events.on('modal:close', () => {
             this.modal.close();
           });
+
+          this.events.on('contacts: change', (data: IUser) => {
+            const errors = this.orderModel.validateContacts(data);
+
+            if (errors.length > 0) {
+              this.contactsView.showError(errors.join('. ') + '.');
+              this.contactsView.setSubmitBtnDisabled(true);
+            } else {
+              this.contactsView.showError('');
+              this.contactsView.setSubmitBtnDisabled(false);
+            }
+
+            this.orderModel.setUser(data);
+          })
+
+          this.events.on('address: change', (data: { address: string }) => {
+            this.orderModel.setAddress(data.address);
+            this.emitOrderFormValidationResult();
+          });
+          
+          this.events.on('payment: change', (data: { payment: 'card' | 'cash' }) => {
+            this.orderModel.setPayment(data.payment);
+            this.emitOrderFormValidationResult();
+          });
+          
+          this.events.on('form:errors', (data: { errors: string; isValid: boolean }) => {
+            this.orderView.showError(data.errors);
+            this.orderView.setSubmitBtnDisabled(!data.isValid);
+          });
+    }
+
+    private renderBasketItems(): HTMLElement[] {
+      const basketData = this.basket.getItems().map((id) =>
+        this.catalog.getItemById(id)
+      );
+    
+      return basketData.map((item, index) => {
+        const view = new BasketViewItem(this.basketItemTeplate, item, index, this.events);
+        return view.render();
+      });
     }
 
     updateCounter() {
         this.page.counter = this.basket.getItems().length;
+    }
+
+    private emitOrderFormValidationResult(): void {
+      const errors = this.orderModel.validate();
+      this.events.emit('form:errors', {
+        errors: errors.length ? errors.join('. ') + '.' : '',
+        isValid: errors.length === 0,
+      });
     }
   }

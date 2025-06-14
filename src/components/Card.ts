@@ -2,14 +2,7 @@ import { Component } from "./common/Component";
 import { IProduct } from "../types";
 import { ensureElement } from "../utils/utils";
 import { IEvents } from "./base/events";
-
-export function formatPrice(value: number | null): string {
-    if (typeof value === 'number') {
-      return `${value} синапсов`;
-    } else {
-      return 'Бесценно';
-    }
-  }
+import { formatPrice } from "../utils/utils";
   
 export class Card extends Component<IProduct> {
     protected itemTitle: HTMLElement;
@@ -68,10 +61,5 @@ export class Card extends Component<IProduct> {
     
         set id(value: number) {
 	        this.itemId = value;
-        }
-    
-        render(data: Partial<IProduct>): HTMLElement {
-	        Object.assign(this as object, data);
-	        return this.container;
         }
 }

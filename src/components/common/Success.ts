@@ -2,7 +2,7 @@ import { Component } from "./Component";
 import {ensureElement} from "../../utils/utils";
 import { IOrderResponse } from "../../types";
 import { IEvents } from "../base/events";
-import { formatPrice } from "../Card";
+import { formatPrice } from "../../utils/utils";
 
 
 export class Success extends Component<IOrderResponse> {

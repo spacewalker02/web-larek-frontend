@@ -13,6 +13,7 @@ import { OrderView } from './components/OrderView';
 import { ContactsView } from './components/ContactsView';
 import { Success } from './components/common/Success';
 import { OrderModel } from './components/base/OrderModel';
+import { BasketViewItem } from './components/BasketViewItem';
 
 const events = new EventEmitter();
 const page = new Page(document.body, events);
@@ -40,9 +41,10 @@ const contactsView = new ContactsView(contactsTemplate, events);
 const successTemplate = document.querySelector<HTMLTemplateElement>('#success');
 const successView = new Success(successTemplate, events);
 
+const basketItemTemplate = document.querySelector<HTMLTemplateElement>('#card-basket');
 
 const view = new ProductListView(catalogContainer, events, template);
-const app = new App(api, model, view, modal, cardPreview, events, basket, page, basketView, orderView, contactsView, successView, order);
+const app = new App(api, model, view, modal, cardPreview, events, basket, page, basketView, orderView, contactsView, successView, order, basketItemTemplate);
 
 events.on('modal:open', () => {
     page.locked = true;

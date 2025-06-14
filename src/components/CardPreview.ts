@@ -2,7 +2,7 @@ import { IProduct } from "../types";
 import { IEvents } from "./base/events";
 import { Component } from "./common/Component";
 import { ensureElement } from "../utils/utils";
-import { formatPrice } from "./Card";
+import { formatPrice } from "../utils/utils";
 
 export class CardPreview extends Component<IProduct> {
     protected itemId: string;

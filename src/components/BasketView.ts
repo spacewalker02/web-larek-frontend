@@ -2,7 +2,7 @@ import { IBasketItem } from "../types";
 import { Component } from "./common/Component";
 import { IEvents } from "./base/events";
 import { ensureElement } from "../utils/utils";
-import { formatPrice } from "./Card";
+import { formatPrice } from "../utils/utils";
 
 export class BasketView extends Component<IBasketItem> {
     protected basketTitle: HTMLElement;
@@ -32,32 +32,12 @@ export class BasketView extends Component<IBasketItem> {
         this.setText(this.totalSum, formatPrice(value));
     }
 
-    set items(items: IBasketItem[]) {
+    set items(items: HTMLElement[]) {
         this.itemList.innerHTML = '';
-        let total = 0;
-
-        items.forEach((item, index) => {
-            const basketItemTemplate = document.querySelector<HTMLTemplateElement>('#card-basket');
-            const basketContentTemplate = basketItemTemplate.content;
-            const basketItemElement = basketContentTemplate.firstElementChild;
-            const itemNode = basketItemElement.cloneNode(true) as HTMLElement;
-
-            this.setText(itemNode.querySelector('.basket__item-index'), String(index + 1));
-            this.setText(itemNode.querySelector('.card__title'), item.title);
-            this.setText(itemNode.querySelector('.card__price'), formatPrice(item.price));
-
-            const deleteBtn = itemNode.querySelector('.basket__item-delete') as HTMLButtonElement;
-            deleteBtn.addEventListener('click', () => {
-                this.events.emit('basket:remove', { id: item.id });
-            });
-
+        items.forEach((itemNode) => {
             this.itemList.appendChild(itemNode);
-            total += item.price ?? 0;
-
-            this.disabled = items.length === 0;
         });
-
-        this.total = total;
+        this.disabled = items.length === 0;
     }
 
     set disabled(value: boolean) {
